@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Event;
+use App\Http\Resources\EventResource;
 
 class EventController extends Controller
 {
@@ -13,7 +14,7 @@ class EventController extends Controller
      */
     public function index()
     {
-        return Event::all();
+        return EventResource::collection(Event::with('user')->get()); //The with method is used to eager load the user relationship
     }
 
     /**
@@ -38,7 +39,8 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-        return $event;
+        $event->load('user','attendees'); //The load method is used to lazy load the user relationship
+        return new EventResource($event);
     }
 
     /**
