@@ -6,15 +6,20 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Http\Resources\EventResource;
+use App\Http\Traits\CanLoadRelationships;
 
 class EventController extends Controller
 {
+    use CanLoadRelationships; //The CanLoadRelationships trait is used to load relationships
+    private array $relations = ['user','attendees','attendees.user']; //The relationships to load
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return EventResource::collection(Event::with('user')->get()); //The with method is used to eager load the user relationship
+        $query = $this->loadRelationships(Event::query()); //The loadRelationships method is used to load the relationships
+        return EventResource::collection($query->latest()->paginate()); //The paginate method is used to divide the results into pages
     }
 
     /**
@@ -31,7 +36,7 @@ class EventController extends Controller
             ]),
             'user_id' => 1,
         ]);
-        return $event;
+        return new EventResource($this->loadRelationships($event));
     }
 
     /**
@@ -39,8 +44,7 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-        $event->load('user','attendees'); //The load method is used to lazy load the user relationship
-        return new EventResource($event);
+        return new EventResource($this->loadRelationships($event));
     }
 
     /**
@@ -57,7 +61,7 @@ class EventController extends Controller
             ])
         );
 
-        return $event;
+        return new EventResource($this->loadRelationships($event));
     }
 
     /**
