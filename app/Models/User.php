@@ -28,6 +28,8 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+
+     //Hidden means that these attributes will not be included in the JSON response
     protected $hidden = [
         'password',
         'remember_token',
